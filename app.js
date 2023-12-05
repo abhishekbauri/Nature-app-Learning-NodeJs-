@@ -1,6 +1,8 @@
 const express = require('express');
 const morgan = require('morgan');
 
+const AppError = require('./utils/appError');
+const globalErrorHandler = require('./controllers/errorController');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 
@@ -34,6 +36,41 @@ app.use(express.json());
 // mounting a new router into a route
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+
+// Error handling (handling unhandled routes)
+// 'all' is used for all type of HTTP request
+app.all('*', (req, res, next) => {
+  // method -1
+  // res.status(404).json({
+  //   status: 'fail',
+  //   message: `Can't find ${req.originalUrl} on this server`,
+  // });
+
+  // // method-2 (using global error handling middleware)
+  // const err = new Error(`Can't find ${req.originalUrl} on this server`);
+  // err.status = 'fail';
+  // err.statusCode = 404;
+  // next(err);
+
+  // method-3
+  next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
+});
+
+// Global error handling middleware
+// method -1
+// app.use((err, req, res, next) => {
+//   // console.log(err.stack);
+//   err.statusCode = err.statusCode || 500;
+//   err.status = err.status || 'error';
+
+//   res.status(err.statusCode).json({
+//     status: err.status,
+//     message: err.message,
+//   });
+// });
+
+// method-2
+app.use(globalErrorHandler);
 
 // // get all tours
 // app.get('/api/v1/tours', getAllTours);
