@@ -1,7 +1,14 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-dotenv.config({ path: './config.env' });
 
+// Uncaught Exceptions
+process.on('uncaughtException', (err) => {
+  console.log('UNCAUGHT EXCEPTON! 💥 Shutting down....');
+  console.log(err.name, err.message);
+  process.exit(1);
+});
+
+dotenv.config({ path: './config.env' });
 const app = require('./app');
 
 // console.log(app.get('env')); // development
@@ -41,6 +48,17 @@ mongoose
 
 const port = process.env.PORT || 3000;
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`App running on port ${port}`);
 });
+
+// Unhandled Rejection: Error outside express
+process.on('unhandledRejection', (err) => {
+  console.log(err.name, err.message);
+  console.log('UNHANDLER REJECTION! 💥 Shutting down....');
+  server.close(() => {
+    process.exit(1);
+  });
+});
+
+// console.log(x); // for catching uncaught exception
