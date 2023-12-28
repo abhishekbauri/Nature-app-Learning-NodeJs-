@@ -127,6 +127,14 @@ tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
 
+// Virtual Populating tours and reviews
+// to get the reviews corresponds to every tour
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour', // field in which id of tour is stored in reviewSchecma
+  localField: '_id',
+});
+
 // DOCUMENT MIDDLEWARE
 // It runs before .save() and .create()
 tourSchema.pre('save', function (next) {
