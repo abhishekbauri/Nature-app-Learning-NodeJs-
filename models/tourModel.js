@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const User = require('./userModel');
 
 // Creating a simple Schema
 const tourSchema = new mongoose.Schema(
@@ -12,7 +13,7 @@ const tourSchema = new mongoose.Schema(
       maxlength: [40, 'A tour must have less or equal than 40 characters'],
       minlength: [5, 'A tour must have more or equal than 5 characters'],
     },
-    // slug: String,
+    slug: String,
     duration: {
       type: Number,
       required: [true, 'A tour must have a durations'],
@@ -74,6 +75,36 @@ const tourSchema = new mongoose.Schema(
       select: false, // It will hide this field
     },
     startDate: [Date],
+    secretTour: {
+      type: Boolean,
+      default: false,
+    },
+    // Embedded Geospatial Data inside a tour model
+    startLocation: {
+      // GeoJSON
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point'],
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point'],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
+    guides: Array,
   },
   // for virtual properties
   {
@@ -89,11 +120,19 @@ tourSchema.virtual('durationWeeks').get(function () {
 
 // DOCUMENT MIDDLEWARE
 // It runs before .save() and .create()
-// tourSchema.pre('save', function (next) {
-//   // console.log(this);
-//   this.slug = slugify(this.name, { lower: true });
-//   next();
-// });
+tourSchema.pre('save', function (next) {
+  // console.log(this);
+  this.slug = slugify(this.name, { lower: true });
+  next();
+});
+
+// Embedding tour guide
+tourSchema.pre('save', async function (next) {
+  const guidesPromises = this.guides.map(async (id) => await User.findById(id));
+  // guidesPromises array is full of promises
+  this.guides = await Promise.all(guidesPromises);
+  next();
+});
 
 // tourSchema.pre('save', function (next) {
 //   console.log('Will save the document 👍 ...');
