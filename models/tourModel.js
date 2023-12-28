@@ -143,6 +143,20 @@ tourSchema.pre('save', function (next) {
 //   next();
 // });
 
+// QUERY MIDDLEWARE
+
+// Populating tour guides
+tourSchema.pre(/^find/, function (next) {
+  // .populate('guides') -> fills with actual data provided by the reference (which makes similar to embedding) while querrying and not in the database
+  // if we don't populate than it will only contains the objectId of the reference and not the actual data
+  // it works on all the find query
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt', // to exclude these fields
+  });
+  next();
+});
+
 // tourSchema.pre('save', function (next) {
 //   console.log('Will save the document 👍 ...');
 //   next();
