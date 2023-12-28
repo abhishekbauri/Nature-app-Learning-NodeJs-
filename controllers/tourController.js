@@ -62,7 +62,7 @@ exports.getTour = catchAsync(async (req, res, next) => {
   // if we don't populate than it will only contains the objectId of the reference and not the actual data
 
   // method -2 (Query middleware)
-  const tour = await Tour.findById(req.params.id);
+  const tour = await Tour.findById(req.params.id).populate('reviews');
 
   // Tour.findOne({_id: req.params.id})
 
