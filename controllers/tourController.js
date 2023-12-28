@@ -53,7 +53,17 @@ exports.createTour = catchAsync(async (req, res, next) => {
 });
 
 exports.getTour = catchAsync(async (req, res, next) => {
+  // method -1
+  // const tour = await Tour.findById(req.params.id).populate({
+  //   path: 'guides',
+  //   select: '-__v -passwordChangedAt', // to exclude these fields
+  // });
+  // .populate('guides') -> fills with actual data provided by the reference (which makes similar to embedding) while querrying and not in the database
+  // if we don't populate than it will only contains the objectId of the reference and not the actual data
+
+  // method -2 (Query middleware)
   const tour = await Tour.findById(req.params.id);
+
   // Tour.findOne({_id: req.params.id})
 
   // handling 404 not found errors
