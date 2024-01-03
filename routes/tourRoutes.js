@@ -1,6 +1,7 @@
 const express = require('express');
 const tourController = require('./../controllers/tourController');
 const authController = require('./../controllers/authController');
+const reviewRouter = require('./../routes/reviewRoutes');
 
 const router = express.Router(); // middleware
 
@@ -16,6 +17,9 @@ const router = express.Router(); // middleware
 // check if body contains the name and price property
 // If not, send back 400 (bad request)
 // Add it to the post handler stack
+
+// method-2 for nested routing
+router.use('/:tourId/reviews', reviewRouter);
 
 router
   .route('/top-5-cheap')
@@ -38,5 +42,20 @@ router
     authController.restrictTo('admin', 'lead-guide'),
     tourController.deleteTour,
   );
+
+// Nested routing
+
+// POST/tour/tourId/reviews  -> nested routes
+// GET/tour/tourId/reviews
+// GET/tour/tourId/reviews/94875ad
+
+// method-1
+// router
+//   .route('/:tourId/reviews')
+//   .post(
+//     authController.protect,
+//     authController.restrictTo('user'),
+//     reviewController.createReview,
+//   );
 
 module.exports = router;
